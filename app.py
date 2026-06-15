@@ -5,13 +5,18 @@ Iniciar:
     python app.py
 """
 
+import io
 import os
 import pickle
 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, Response, jsonify, render_template, request
 from huggingface_hub import InferenceClient
 
 load_dotenv()
@@ -19,7 +24,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# ─── Carregar artefatos ───────────────────────────────────────────────────────
+# ─── Carregar artefatos do modelo ─────────────────────────────────────────────
 def _load(fname):
     with open(os.path.join('models', fname), 'rb') as f:
         return pickle.load(f)
@@ -28,10 +33,16 @@ MODEL  = _load('best_model.pkl')
 SCALER = _load('scaler.pkl')
 META   = _load('metadata.pkl')
 
+# ─── Carregar dataset para visualizações ──────────────────────────────────────
+_df = pd.read_csv(os.path.join('data', 'StudentsPerformance.csv'))
+_df.columns = [c.strip() for c in _df.columns]
+_df['average_score'] = (_df['math score'] + _df['reading score'] + _df['writing score']) / 3
+_df['passed'] = (_df['average_score'] >= 60).astype(int)
+
 # ─── Configuração HuggingFace ─────────────────────────────────────────────────
 # Token precisa ter permissão: "Make calls to Inference Providers"
 HF_TOKEN = os.environ.get('HF_TOKEN', '')
-HF_MODEL = 'mistralai/Mistral-7B-Instruct-v0.2'
+HF_MODEL = 'meta-llama/Llama-3.1-8B-Instruct'
 
 # ─── Mapeamentos ──────────────────────────────────────────────────────────────
 EDU_ORDER = {
@@ -60,6 +71,58 @@ SYSTEM_PROMPT = (
     "Máximo 4 parágrafos por resposta."
 )
 
+# ─── Geração de gráficos (servidos como rotas) ────────────────────────────────
+def _fig_to_png(fig) -> bytes:
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png', dpi=130, bbox_inches='tight')
+    buf.seek(0)
+    data = buf.getvalue()
+    plt.close(fig)
+    return data
+
+@app.route('/plot/correlation')
+def plot_correlation():
+    sns.set_theme(style='whitegrid')
+    fig, ax = plt.subplots(figsize=(7, 5))
+    corr = _df[['math score', 'reading score', 'writing score', 'average_score']].corr()
+    sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5, ax=ax)
+    ax.set_title('Matriz de Correlação – Notas dos Estudantes', pad=12)
+    fig.tight_layout()
+    return Response(_fig_to_png(fig), mimetype='image/png')
+
+@app.route('/plot/boxplot')
+def plot_boxplot():
+    sns.set_theme(style='whitegrid')
+    fig, ax = plt.subplots(figsize=(10, 5))
+    melted = _df.melt(
+        id_vars=['lunch'],
+        value_vars=['math score', 'reading score', 'writing score'],
+        var_name='Disciplina', value_name='Nota'
+    )
+    sns.boxplot(data=melted, x='Disciplina', y='Nota',
+                hue='lunch', palette='Set2', ax=ax)
+    ax.set_title('Distribuição das Notas por Tipo de Almoço', pad=12)
+    ax.set_xlabel('')
+    ax.legend(title='Almoço')
+    fig.tight_layout()
+    return Response(_fig_to_png(fig), mimetype='image/png')
+
+@app.route('/plot/frequency')
+def plot_frequency():
+    sns.set_theme(style='whitegrid')
+    fig, ax = plt.subplots(figsize=(10, 5))
+    freq = (_df.groupby(['race/ethnicity', 'passed'])
+               .size()
+               .reset_index(name='count'))
+    freq['Status'] = freq['passed'].map({0: 'Reprovado', 1: 'Aprovado'})
+    sns.barplot(data=freq, x='race/ethnicity', y='count',
+                hue='Status', palette='Set1', ax=ax)
+    ax.set_title('Frequência de Aprovação por Grupo Étnico', pad=12)
+    ax.set_xlabel('Grupo Étnico')
+    ax.set_ylabel('Nº de Estudantes')
+    fig.tight_layout()
+    return Response(_fig_to_png(fig), mimetype='image/png')
+
 # ─── Chamada ao Agente (HuggingFace Inference API) ───────────────────────────
 def call_hf(user_message: str) -> str:
     if not HF_TOKEN:
@@ -83,15 +146,14 @@ def call_hf(user_message: str) -> str:
         err = str(e)
         if '401' in err:
             return (
-                "Erro de autenticação (401): seu token HuggingFace não tem "
-                "permissão de inferência. Crie um novo token em "
-                "huggingface.co/settings/tokens marcando "
-                "'Make calls to Inference Providers', e atualize o .env."
+                "Erro de autenticação (401): token HuggingFace sem permissão "
+                "de inferência. Crie um novo token em huggingface.co/settings/tokens "
+                "marcando 'Make calls to Inference Providers'."
             )
         return f"[Erro ao contatar o agente: {err}]"
 
 
-# ─── Pré-processamento ────────────────────────────────────────────────────────
+# ─── Pré-processamento da entrada ─────────────────────────────────────────────
 def preprocess_input(gender, ethnicity, parental_edu, lunch, test_prep):
     row = {
         'gender':                      1 if gender == 'male' else 0,
@@ -108,8 +170,8 @@ def preprocess_input(gender, ethnicity, parental_edu, lunch, test_prep):
 
 def predict(X_scaled):
     if META['model_type'] == 'regression':
-        avg  = MODEL.predict(X_scaled)[0]
-        pred = int(avg >= 60)
+        avg   = MODEL.predict(X_scaled)[0]
+        pred  = int(avg >= 60)
         proba = None
     else:
         pred  = int(MODEL.predict(X_scaled)[0])
@@ -119,7 +181,7 @@ def predict(X_scaled):
     return pred, proba
 
 
-# ─── Rotas ────────────────────────────────────────────────────────────────────
+# ─── Rotas principais ─────────────────────────────────────────────────────────
 @app.route('/')
 def index():
     return render_template(
@@ -143,14 +205,14 @@ def predict_route():
         'test_prep':    request.form.get('test_prep', 'none'),
     }
 
-    X_scaled     = preprocess_input(**form)
-    pred, proba  = predict(X_scaled)
-    label        = 'APROVADO' if pred == 1 else 'REPROVADO'
-    acc          = META['metrics']['Acurácia']
-    edu_pt       = EDU_LABELS.get(form['parental_edu'], form['parental_edu'])
-    lunch_pt     = 'Padrão' if form['lunch'] == 'standard' else 'Gratuito/Reduzido'
-    prep_pt      = 'Completado' if form['test_prep'] == 'completed' else 'Não realizado'
-    gender_pt    = 'Masculino' if form['gender'] == 'male' else 'Feminino'
+    X_scaled    = preprocess_input(**form)
+    pred, proba = predict(X_scaled)
+    label       = 'APROVADO' if pred == 1 else 'REPROVADO'
+    acc         = META['metrics']['Acurácia']
+    edu_pt      = EDU_LABELS.get(form['parental_edu'], form['parental_edu'])
+    lunch_pt    = 'Padrão' if form['lunch'] == 'standard' else 'Gratuito/Reduzido'
+    prep_pt     = 'Completado' if form['test_prep'] == 'completed' else 'Não realizado'
+    gender_pt   = 'Masculino' if form['gender'] == 'male' else 'Feminino'
 
     context_text = (
         f"Perfil analisado:\n"
@@ -186,9 +248,9 @@ def predict_route():
 
 @app.route('/chat', methods=['POST'])
 def chat_route():
-    data        = request.get_json()
-    user_msg    = data.get('message', '').strip()
-    context     = data.get('context', '')
+    data     = request.get_json()
+    user_msg = data.get('message', '').strip()
+    context  = data.get('context', '')
 
     if not user_msg:
         return jsonify({'response': 'Por favor, escreva uma mensagem.'})
@@ -198,8 +260,7 @@ def chat_route():
         f"Pergunta do usuário: {user_msg}"
     )
 
-    response = call_hf(full_msg)
-    return jsonify({'response': response})
+    return jsonify({'response': call_hf(full_msg)})
 
 
 if __name__ == '__main__':

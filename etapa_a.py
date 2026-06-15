@@ -1,27 +1,22 @@
 """
-Etapa A – Pré-processamento, EDA e Treinamento de Modelos
+Etapa A – Pré-processamento e Treinamento de Modelos
 Dataset: Students Performance in Exams (Kaggle)
 
 Execute este script UMA VEZ antes de iniciar o servidor Flask:
     python etapa_a.py
 
-Artefatos gerados:
-    models/best_model.pkl
-    models/scaler.pkl
-    models/metadata.pkl
-    models/results.csv
-    static/plots/correlation_heatmap.png
-    static/plots/boxplot_lunch.png
-    static/plots/frequency_ethnicity.png
+Artefatos gerados em models/:
+    best_model.pkl  – melhor modelo treinado
+    scaler.pkl      – StandardScaler ajustado
+    metadata.pkl    – nome, métricas e features do modelo
+    results.csv     – comparativo de todos os modelos
+
+Os gráficos EDA são gerados dinamicamente pelo servidor Flask (app.py).
 """
 
 import os
 import pickle
 
-import matplotlib
-matplotlib.use('Agg')  # sem display (compatível com servidor)
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 import pandas as pd
 
@@ -35,7 +30,6 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
 
 os.makedirs('models', exist_ok=True)
-os.makedirs(os.path.join('static', 'plots'), exist_ok=True)
 
 # ─── 1. Carregar dados ────────────────────────────────────────────────────────
 df = pd.read_csv(os.path.join('data', 'StudentsPerformance.csv'))
@@ -55,54 +49,9 @@ df['passed'] = (df['average_score'] >= 60).astype(int)
 print("\nDistribuição da variável alvo (passed):")
 print(df['passed'].value_counts())
 
-# ─── 3. Gráficos EDA – Seaborn ────────────────────────────────────────────────
-sns.set_theme(style='whitegrid', palette='muted', font_scale=1.1)
-
-# 3a) Heatmap de correlação
-fig, ax = plt.subplots(figsize=(7, 5))
-corr = df[['math score', 'reading score', 'writing score', 'average_score']].corr()
-sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f',
-            linewidths=0.5, ax=ax)
-ax.set_title('Matriz de Correlação – Notas dos Estudantes', pad=14)
-fig.tight_layout()
-fig.savefig(os.path.join('static', 'plots', 'correlation_heatmap.png'), dpi=150)
-plt.close(fig)
-print("✓ Heatmap de correlação salvo.")
-
-# 3b) Box Plot – notas por tipo de almoço
-fig, ax = plt.subplots(figsize=(10, 5))
-df_melted = df.melt(
-    id_vars=['lunch'],
-    value_vars=['math score', 'reading score', 'writing score'],
-    var_name='Disciplina', value_name='Nota'
-)
-sns.boxplot(data=df_melted, x='Disciplina', y='Nota',
-            hue='lunch', palette='Set2', ax=ax)
-ax.set_title('Distribuição das Notas por Tipo de Almoço', pad=14)
-ax.set_xlabel('')
-ax.legend(title='Almoço')
-fig.tight_layout()
-fig.savefig(os.path.join('static', 'plots', 'boxplot_lunch.png'), dpi=150)
-plt.close(fig)
-print("✓ Box Plot salvo.")
-
-# 3c) Gráfico de frequência – aprovação por grupo étnico
-fig, ax = plt.subplots(figsize=(10, 5))
-freq = (df.groupby(['race/ethnicity', 'passed'])
-          .size()
-          .reset_index(name='count'))
-freq['Status'] = freq['passed'].map({0: 'Reprovado', 1: 'Aprovado'})
-sns.barplot(data=freq, x='race/ethnicity', y='count',
-            hue='Status', palette='Set1', ax=ax)
-ax.set_title('Frequência de Aprovação por Grupo Étnico', pad=14)
-ax.set_xlabel('Grupo Étnico')
-ax.set_ylabel('Nº de Estudantes')
-fig.tight_layout()
-fig.savefig(os.path.join('static', 'plots', 'frequency_ethnicity.png'), dpi=150)
-plt.close(fig)
-print("✓ Gráfico de frequência salvo.")
-
-# ─── 4. Pré-processamento ─────────────────────────────────────────────────────
+# ─── 3. Pré-processamento ─────────────────────────────────────────────────────
+# Obs: os gráficos EDA são gerados dinamicamente pelo servidor Flask (app.py),
+# acessíveis em /plot/correlation, /plot/boxplot e /plot/frequency.
 EDU_ORDER = {
     'some high school': 0,
     'high school': 1,
@@ -150,7 +99,7 @@ X_test_s  = scaler.transform(X_test)
 
 print(f"\nTreino: {X_train_s.shape[0]} | Teste: {X_test_s.shape[0]}")
 
-# ─── 5. Função de métricas ────────────────────────────────────────────────────
+# ─── 4. Função de métricas ────────────────────────────────────────────────────
 def compute_metrics(y_true, y_pred):
     tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
     return {
@@ -162,7 +111,7 @@ def compute_metrics(y_true, y_pred):
 
 results = {}
 
-# ─── 6. Modelos ───────────────────────────────────────────────────────────────
+# ─── 5. Modelos ───────────────────────────────────────────────────────────────
 
 # 6a) Regressão Linear (predição contínua → threshold em 60)
 lr = LinearRegression()
@@ -197,7 +146,7 @@ y_pred_nb = nb.predict(X_test_s)
 results['Naive Bayes'] = compute_metrics(y_test_cls, y_pred_nb)
 print(f"✓ Naive Bayes:      {results['Naive Bayes']}")
 
-# ─── 7. Comparação e seleção do melhor ───────────────────────────────────────
+# ─── 6. Comparação e seleção do melhor ───────────────────────────────────────
 results_df = pd.DataFrame(results).T
 print("\n===== Resultados Comparativos =====")
 print(results_df.to_string())
@@ -214,7 +163,7 @@ model_map = {
 }
 best_model, model_type = model_map[best_name]
 
-# ─── 8. Salvar artefatos ─────────────────────────────────────────────────────
+# ─── 7. Salvar artefatos ─────────────────────────────────────────────────────
 with open(os.path.join('models', 'best_model.pkl'), 'wb') as f:
     pickle.dump(best_model, f)
 
