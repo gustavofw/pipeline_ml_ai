@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agente Preditivo – Desempenho Estudantil</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      background: #eef2f7;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Cabeçalho ── */
+    .topbar {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #fff;
+      padding: .75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .topbar h1 { font-size: 1.1rem; font-weight: 700; margin: 0; }
+    .metric-chip {
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: .75rem;
+      margin-left: 6px;
+    }
+
+    /* ── Layout principal ── */
+    .main-layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      gap: 0;
+    }
+
+    /* ── Sidebar formulário ── */
+    .sidebar {
+      width: 300px;
+      background: #fff;
+      border-right: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .sidebar-header {
+      background: #1e3a8a;
+      color: #fff;
+      padding: .75rem 1rem;
+      font-weight: 600;
+      font-size: .9rem;
+      flex-shrink: 0;
+    }
+    .sidebar-body { padding: 1rem; flex: 1; }
+    .form-label { font-size: .82rem; font-weight: 600; color: #374151; }
+    .form-select { font-size: .82rem; }
+    .btn-analyze {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      border: none; color: #fff; font-weight: 600;
+      width: 100%; padding: .6rem; border-radius: 8px;
+      font-size: .88rem; margin-top: .5rem; cursor: pointer;
+    }
+    .btn-analyze:hover { opacity: .88; }
+    .btn-analyze:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Painel de chat ── */
+    .chat-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .8rem;
+    }
+
+    /* ── Bolhas de mensagem ── */
+    .msg { display: flex; align-items: flex-end; gap: .5rem; max-width: 78%; }
+    .msg.bot  { align-self: flex-start; }
+    .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
+    }
+    .bot .avatar  { background: #dbeafe; }
+    .user .avatar { background: #dcfce7; }
+
+    .bubble {
+      padding: .65rem 1rem;
+      border-radius: 16px;
+      font-size: .88rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .bot  .bubble { background: #fff; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; }
+    .user .bubble { background: #2563eb; color: #fff; border-bottom-right-radius: 4px; }
+
+    /* Badge resultado */
+    .result-badge {
+      display: inline-block;
+      font-weight: 700; font-size: 1rem;
+      padding: .3rem .9rem; border-radius: 8px; margin-bottom: .4rem;
+    }
+    .badge-pass { background: #dcfce7; color: #166534; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+
+    /* Typing indicator */
+    .typing .bubble { background: #f1f5f9; border: 1px solid #e2e8f0; }
+    .dots span {
+      display: inline-block; width: 7px; height: 7px;
+      background: #94a3b8; border-radius: 50%; margin: 0 2px;
+      animation: bounce 1.2s infinite;
+    }
+    .dots span:nth-child(2) { animation-delay: .2s; }
+    .dots span:nth-child(3) { animation-delay: .4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-6px); }
+    }
+
+    /* ── Input de chat ── */
+    .chat-input-bar {
+      border-top: 1px solid #e2e8f0;
+      padding: .8rem 1.2rem;
+      display: flex; gap: .6rem;
+      background: #fff;
+      flex-shrink: 0;
+    }
+    .chat-input-bar input {
+      flex: 1; border: 1px solid #cbd5e1; border-radius: 24px;
+      padding: .5rem 1rem; font-size: .88rem; outline: none;
+    }
+    .chat-input-bar input:focus { border-color: #2563eb; }
+    .chat-input-bar input:disabled { background: #f8fafc; color: #94a3b8; }
+    .btn-send {
+      background: #2563eb; border: none; color: #fff;
+      border-radius: 50%; width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .btn-send:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-send svg { width: 16px; height: 16px; }
+
+    /* ── Gráficos EDA (collapsible) ── */
+    .graphs-bar {
+      border-top: 1px solid #e2e8f0;
+      background: #f8fafc;
+      flex-shrink: 0;
+    }
+    .graphs-toggle {
+      width: 100%; background: none; border: none;
+      padding: .5rem 1.2rem; text-align: left;
+      font-size: .82rem; font-weight: 600; color: #475569;
+      cursor: pointer; display: flex; align-items: center; gap: .4rem;
+    }
+    .graphs-toggle:hover { background: #f1f5f9; }
+    .graphs-content {
+      display: none; padding: .8rem 1.2rem;
+      overflow-x: auto;
+    }
+    .graphs-content.show { display: flex; gap: 1rem; }
+    .graph-card {
+      background: #fff; border: 1px solid #e2e8f0;
+      border-radius: 10px; padding: .6rem; text-align: center;
+      min-width: 260px; flex-shrink: 0;
+    }
+    .graph-card img { width: 100%; max-height: 200px; object-fit: contain; border-radius: 6px; }
+    .graph-label { font-size: .75rem; color: #6b7280; margin-top: .3rem; }
+
+    /* Tabela comparativa no sidebar */
+    .compare-table { font-size: .75rem; }
+    .compare-table th, .compare-table td { padding: 3px 5px; }
+    .best-row { background: #dbeafe; font-weight: 700; }
+
+    @media (max-width: 640px) {
+      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; max-height: 50vh; }
+      .main-layout { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <h1>🎓 Agente Preditivo de Desempenho Estudantil</h1>
+  <div>
+    {% for k, v in model_metrics.items() %}
+    <span class="metric-chip">{{ k }}: {{ "%.1f%%"|format(v*100) }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="main-layout">
+
+  <!-- ── Sidebar: formulário ── -->
+  <div class="sidebar">
+    <div class="sidebar-header">Dados do Estudante</div>
+    <div class="sidebar-body">
+      <form id="studentForm">
+
+        <div class="mb-2">
+          <label class="form-label">Gênero</label>
+          <select name="gender" class="form-select form-select-sm">
+            <option value="female">Feminino</option>
+            <option value="male">Masculino</option>
+          </select>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Grupo Étnico</label>
+          <select name="ethnicity" class="form-select form-select-sm">
+            {% for g in groups %}
+            <option value="{{ g }}">{{ g|title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Escolaridade dos Pais</label>
+          <select name="parental_edu" class="form-select form-select-sm">
+            {% for edu in edu_options %}
+            <option value="{{ edu }}">{{ edu_labels[edu] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Tipo de Almoço</label>
+          <select name="lunch" class="form-select form-select-sm">
+            <option value="standard">Padrão</option>
+            <option value="free/reduced">Gratuito / Reduzido</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Curso Preparatório</label>
+          <select name="test_prep" class="form-select form-select-sm">
+            <option value="none">Não realizado</option>
+            <option value="completed">Completado</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-analyze" id="btnAnalyze">
+          Analisar Perfil
+        </button>
+      </form>
+
+      <!-- Tabela comparativa -->
+      <div class="mt-3">
+        <p class="form-label mb-1">Comparativo de Modelos</p>
+        <table class="table table-sm table-bordered compare-table mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Modelo</th><th>Acur.</th><th>Prec.</th><th>Sens.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for name, m in all_results.items() %}
+            <tr {% if name == model_name %}class="best-row"{% endif %}>
+              <td>{{ name }}</td>
+              <td>{{ "%.0f%%"|format(m['Acurácia']*100) }}</td>
+              <td>{{ "%.0f%%"|format(m['Precisão']*100) }}</td>
+              <td>{{ "%.0f%%"|format(m['Sensibilidade']*100) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <small class="text-muted">Linha azul = modelo ativo</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Painel de chat ── -->
+  <div class="chat-panel">
+
+    <div class="chat-messages" id="chatMessages">
+      <!-- Mensagem inicial do bot -->
+      <div class="msg bot">
+        <div class="avatar">🤖</div>
+        <div class="bubble">
+Olá! Sou o <strong>Agente Preditivo de Desempenho Estudantil</strong>.
+
+Preencha o formulário ao lado com os dados do estudante e clique em <strong>Analisar Perfil</strong>. Vou fazer a predição com o modelo <strong>{{ model_name }}</strong> e explicar o resultado para você.
+
+Após a análise, pode me fazer perguntas sobre o resultado!
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-bar">
+      <input type="text" id="chatInput"
+             placeholder="Faça sua predição primeiro para habilitar o chat..."
+             disabled>
+      <button class="btn-send" id="btnSend" disabled title="Enviar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Gráficos EDA colapsáveis -->
+    <div class="graphs-bar">
+      <button class="graphs-toggle" onclick="toggleGraphs()">
+        📊 Análise Exploratória dos Dados
+        <span id="graphArrow">▾</span>
+      </button>
+      <div class="graphs-content" id="graphsContent">
+        <div class="graph-card">
+          <img src="/static/plots/correlation_heatmap.png" alt="Heatmap">
+          <div class="graph-label">Matriz de Correlação</div>
+        </div>
+        <div class="graph-card">
+          <img src="/static/plots/boxplot_lunch.png" alt="Box Plot">
+          <div class="graph-label">Box Plot – Notas por Almoço</div>
+        </div>
+        <div class="graph-card">
+          <img src="/static/plots/frequency_ethnicity.png" alt="Frequência">
+          <div class="graph-label">Aprovação por Grupo Étnico</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let studentContext = '';
+
+  // ── Funções de chat UI ────────────────────────────────────────────────────
+
+  function scrollToBottom() {
+    const el = document.getElementById('chatMessages');
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function addMessage(text, role) {
+    const wrap = document.getElementById('chatMessages');
+
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = role === 'bot' ? '🤖' : '🧑';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = text;
+
+    div.appendChild(avatar);
+    div.appendChild(bubble);
+    wrap.appendChild(div);
+    scrollToBottom();
+    return div;
+  }
+
+  function addTyping() {
+    const wrap = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'msg bot typing';
+    div.id = 'typingIndicator';
+    div.innerHTML = `
+      <div class="avatar">🤖</div>
+      <div class="bubble"><span class="dots">
+        <span></span><span></span><span></span>
+      </span></div>`;
+    wrap.appendChild(div);
+    scrollToBottom();
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  function enableChat() {
+    const input = document.getElementById('chatInput');
+    const btn   = document.getElementById('btnSend');
+    input.disabled = false;
+    input.placeholder = 'Pergunte algo sobre o resultado...';
+    btn.disabled = false;
+  }
+
+  // ── Gráficos colapsáveis ──────────────────────────────────────────────────
+
+  function toggleGraphs() {
+    const content = document.getElementById('graphsContent');
+    const arrow   = document.getElementById('graphArrow');
+    content.classList.toggle('show');
+    arrow.textContent = content.classList.contains('show') ? '▴' : '▾';
+  }
+
+  // ── Predição ─────────────────────────────────────────────────────────────
+
+  document.getElementById('studentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const btn = document.getElementById('btnAnalyze');
+    btn.disabled = true;
+    btn.textContent = 'Analisando...';
+
+    const formData = new FormData(e.target);
+    addTyping();
+
+    try {
+      const resp = await fetch('/predict', { method: 'POST', body: formData });
+      const data = await resp.json();
+      removeTyping();
+
+      const badgeClass = data.passed ? 'badge-pass' : 'badge-fail';
+      const icon       = data.passed ? '✅' : '❌';
+      const probaText  = data.probability
+        ? `<br><small style="color:#6b7280">Confiança: ${data.probability}%</small>`
+        : '';
+
+      const html = `<span class="result-badge ${badgeClass}">${icon} ${data.label}</span>${probaText}
+<small style="color:#6b7280">Modelo: {{ model_name }}</small>
+
+${escapeHtml(data.explanation)}`;
+
+      addMessage(html, 'bot');
+      studentContext = data.context;
+      enableChat();
+
+    } catch (err) {
+      removeTyping();
+      addMessage(`Erro ao processar: ${err.message}`, 'bot');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Analisar Perfil';
+  });
+
+  // ── Chat follow-up ────────────────────────────────────────────────────────
+
+  async function sendChat() {
+    const input = document.getElementById('chatInput');
+    const msg   = input.value.trim();
+    if (!msg) return;
+
+    addMessage(escapeHtml(msg), 'user');
+    input.value = '';
+    addTyping();
+
+    try {
+      const resp = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, context: studentContext }),
+      });
+      const data = await resp.json();
+      removeTyping();
+      addMessage(escapeHtml(data.response), 'bot');
+    } catch (err) {
+      removeTyping();
+      addMessage(`Erro: ${err.message}`, 'bot');
+    }
+  }
+
+  document.getElementById('btnSend').addEventListener('click', sendChat);
+  document.getElementById('chatInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+  });
+
+  function escapeHtml(text) {
+    return (text || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>');
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

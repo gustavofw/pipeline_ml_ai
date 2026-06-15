@@ -1,0 +1,27 @@
+# Credenciais — NUNCA commitar o .env real
+.env
+
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Ambiente virtual
+venv/
+.venv/
+env/
+
+# IDEs e ferramentas locais
+.vscode/
+.idea/
+*.swp
+.claude/
+
+# Sistema
+.DS_Store
+Thumbs.db

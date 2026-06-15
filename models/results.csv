@@ -1,0 +1,5 @@
+,Acurácia,Precisão,Sensibilidade,Especificidade
+Regressão Linear,0.69,0.7368,0.8811,0.2105
+KNN,0.68,0.7516,0.8252,0.3158
+MLP,0.71,0.7485,0.8951,0.2456
+Naive Bayes,0.665,0.7436,0.8112,0.2982
