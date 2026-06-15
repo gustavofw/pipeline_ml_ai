@@ -328,16 +328,36 @@ Após a análise, pode me fazer perguntas sobre o resultado!
       </button>
       <div class="graphs-content" id="graphsContent">
         <div class="graph-card">
-          <img src="/plot/correlation" alt="Heatmap">
+          <img src="/plot/correlation" alt="Correlação">
           <div class="graph-label">Matriz de Correlação</div>
         </div>
         <div class="graph-card">
-          <img src="/plot/boxplot" alt="Box Plot">
-          <div class="graph-label">Box Plot – Notas por Almoço</div>
+          <img src="/plot/distribution" alt="Distribuição">
+          <div class="graph-label">Distribuição das Notas</div>
         </div>
         <div class="graph-card">
-          <img src="/plot/frequency" alt="Frequência">
+          <img src="/plot/boxplot" alt="Box Plot Almoço">
+          <div class="graph-label">Box Plot – Tipo de Almoço</div>
+        </div>
+        <div class="graph-card">
+          <img src="/plot/testprep" alt="Box Plot Preparatório">
+          <div class="graph-label">Box Plot – Curso Preparatório</div>
+        </div>
+        <div class="graph-card">
+          <img src="/plot/frequency" alt="Frequência Étnica">
           <div class="graph-label">Aprovação por Grupo Étnico</div>
+        </div>
+        <div class="graph-card">
+          <img src="/plot/education" alt="Escolaridade">
+          <div class="graph-label">Aprovação por Escolaridade dos Pais</div>
+        </div>
+        <div class="graph-card">
+          <img src="/plot/scatter" alt="Scatter">
+          <div class="graph-label">Scatter – Matemática × Leitura</div>
+        </div>
+        <div class="graph-card">
+          <img src="/plot/models" alt="Modelos">
+          <div class="graph-label">Comparativo dos 4 Modelos de ML</div>
         </div>
       </div>
     </div>
@@ -493,17 +513,26 @@ ${renderGraphs(escapeHtml(data.explanation))}`;
   }
 
   // Substitui marcadores [GRAPH:tipo] por imagens geradas pelo servidor
+  const GRAPH_LABELS = {
+    correlation:  'Matriz de Correlação',
+    boxplot:      'Box Plot – Notas por Almoço',
+    frequency:    'Frequência de Aprovação por Grupo Étnico',
+    distribution: 'Distribuição das Notas por Disciplina',
+    testprep:     'Notas por Curso Preparatório',
+    education:    'Taxa de Aprovação por Escolaridade dos Pais',
+    scatter:      'Scatter – Matemática × Leitura',
+    models:       'Comparativo dos 4 Modelos de ML',
+  };
   function renderGraphs(text) {
-    return text.replace(/\[GRAPH:(correlation|boxplot|frequency)\]/gi, (match, tipo) => {
-      const labels = {
-        correlation: 'Matriz de Correlação',
-        boxplot:     'Box Plot – Notas por Almoço',
-        frequency:   'Frequência de Aprovação por Grupo Étnico',
-      };
-      return `<br><img src="/plot/${tipo}" alt="${labels[tipo]}"
-               style="max-width:100%;border-radius:8px;margin:8px 0;display:block;">
-               <small style="color:#6b7280">${labels[tipo]}</small><br>`;
-    });
+    return text.replace(
+      /\[GRAPH:(correlation|boxplot|frequency|distribution|testprep|education|scatter|models)\]/gi,
+      (match, tipo) => {
+        const label = GRAPH_LABELS[tipo] || tipo;
+        return `<br><img src="/plot/${tipo}" alt="${label}"
+                 style="max-width:100%;border-radius:8px;margin:8px 0;display:block;">
+                 <small style="color:#6b7280">${label}</small><br>`;
+      }
+    );
   }
 </script>
 

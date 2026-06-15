@@ -71,9 +71,14 @@ Baseie-se APENAS nas informações fornecidas — sem inventar dados.
 Máximo 4 parágrafos por resposta.
 
 GRÁFICOS DISPONÍVEIS — use os marcadores abaixo quando o usuário pedir uma visualização:
-- [GRAPH:correlation] → Matriz de Correlação entre as notas de matemática, leitura, escrita e média
-- [GRAPH:boxplot]     → Box Plot das notas separadas por tipo de almoço (padrão vs gratuito/reduzido)
-- [GRAPH:frequency]  → Frequência de aprovação por grupo étnico
+- [GRAPH:correlation]  → Matriz de Correlação entre as notas (matemática, leitura, escrita, média)
+- [GRAPH:boxplot]      → Box Plot das notas por tipo de almoço (padrão vs gratuito/reduzido)
+- [GRAPH:frequency]   → Frequência de aprovação por grupo étnico
+- [GRAPH:distribution] → Histograma + KDE da distribuição de notas por disciplina
+- [GRAPH:testprep]    → Box Plot das notas por realização do curso preparatório
+- [GRAPH:education]   → Taxa de aprovação por nível de escolaridade dos pais
+- [GRAPH:scatter]     → Scatter Plot de Matemática × Leitura colorido por aprovação
+- [GRAPH:models]      → Comparativo visual das métricas dos 4 algoritmos de ML
 
 Regras para gráficos:
 1. Insira o marcador na linha em que o gráfico deve aparecer.
@@ -130,6 +135,119 @@ def plot_frequency():
     ax.set_title('Frequência de Aprovação por Grupo Étnico', pad=12)
     ax.set_xlabel('Grupo Étnico')
     ax.set_ylabel('Nº de Estudantes')
+    fig.tight_layout()
+    return Response(_fig_to_png(fig), mimetype='image/png')
+
+@app.route('/plot/distribution')
+def plot_distribution():
+    sns.set_theme(style='whitegrid')
+    fig, axes = plt.subplots(1, 3, figsize=(14, 4))
+    cols   = ['math score', 'reading score', 'writing score']
+    titles = ['Matemática', 'Leitura', 'Escrita']
+    colors = ['#3b82f6', '#10b981', '#f59e0b']
+    for ax, col, title, color in zip(axes, cols, titles, colors):
+        sns.histplot(_df[col], bins=20, kde=True, color=color, ax=ax)
+        ax.axvline(_df[col].mean(), color='red', linestyle='--', linewidth=1.2,
+                   label=f'Média: {_df[col].mean():.1f}')
+        ax.set_title(title)
+        ax.set_xlabel('Nota')
+        ax.legend(fontsize=8)
+    fig.suptitle('Distribuição das Notas por Disciplina', fontsize=13, y=1.02)
+    fig.tight_layout()
+    return Response(_fig_to_png(fig), mimetype='image/png')
+
+@app.route('/plot/testprep')
+def plot_testprep():
+    sns.set_theme(style='whitegrid')
+    fig, ax = plt.subplots(figsize=(10, 5))
+    melted = _df.melt(
+        id_vars=['test preparation course'],
+        value_vars=['math score', 'reading score', 'writing score'],
+        var_name='Disciplina', value_name='Nota'
+    )
+    sns.boxplot(data=melted, x='Disciplina', y='Nota',
+                hue='test preparation course', palette='Set3', ax=ax)
+    ax.set_title('Distribuição das Notas por Curso Preparatório', pad=12)
+    ax.set_xlabel('')
+    ax.legend(title='Curso Preparatório')
+    fig.tight_layout()
+    return Response(_fig_to_png(fig), mimetype='image/png')
+
+@app.route('/plot/education')
+def plot_education():
+    sns.set_theme(style='whitegrid')
+    edu_order = ['some high school', 'high school', 'some college',
+                 "associate's degree", "bachelor's degree", "master's degree"]
+    edu_labels = ['E.M. Incompleto', 'Ensino Médio', 'Sup. Incompleto',
+                  'Técnico', 'Bacharelado', 'Mestrado']
+    taxa = (_df.groupby('parental level of education')['passed']
+               .mean()
+               .reindex(edu_order)
+               .reset_index())
+    taxa.columns = ['Escolaridade', 'Taxa de Aprovação']
+    taxa['Escolaridade'] = edu_labels
+    fig, ax = plt.subplots(figsize=(10, 5))
+    bars = sns.barplot(data=taxa, x='Escolaridade', y='Taxa de Aprovação',
+                       palette='Blues_d', ax=ax)
+    for p in ax.patches:
+        ax.annotate(f'{p.get_height():.0%}',
+                    (p.get_x() + p.get_width() / 2, p.get_height()),
+                    ha='center', va='bottom', fontsize=9)
+    ax.set_title('Taxa de Aprovação por Escolaridade dos Pais', pad=12)
+    ax.set_ylabel('Taxa de Aprovação')
+    ax.set_ylim(0, 1.1)
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:.0%}'))
+    fig.tight_layout()
+    return Response(_fig_to_png(fig), mimetype='image/png')
+
+@app.route('/plot/scatter')
+def plot_scatter():
+    sns.set_theme(style='whitegrid')
+    fig, ax = plt.subplots(figsize=(8, 6))
+    palette = {0: '#ef4444', 1: '#22c55e'}
+    labels  = {0: 'Reprovado', 1: 'Aprovado'}
+    for status, grp in _df.groupby('passed'):
+        ax.scatter(grp['math score'], grp['reading score'],
+                   c=palette[status], label=labels[status],
+                   alpha=0.55, edgecolors='none', s=40)
+    ax.set_title('Matemática × Leitura (por Resultado)', pad=12)
+    ax.set_xlabel('Nota de Matemática')
+    ax.set_ylabel('Nota de Leitura')
+    ax.axhline(60, color='gray', linestyle='--', linewidth=0.8)
+    ax.axvline(60, color='gray', linestyle='--', linewidth=0.8)
+    ax.legend(title='Resultado')
+    fig.tight_layout()
+    return Response(_fig_to_png(fig), mimetype='image/png')
+
+@app.route('/plot/models')
+def plot_models():
+    sns.set_theme(style='whitegrid')
+    all_res = META['all_results']
+    metrics = ['Acurácia', 'Precisão', 'Sensibilidade', 'Especificidade']
+    models  = list(all_res.keys())
+    x       = np.arange(len(metrics))
+    width   = 0.18
+    colors  = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
+
+    fig, ax = plt.subplots(figsize=(12, 5))
+    for i, (model, color) in enumerate(zip(models, colors)):
+        vals = [all_res[model][m] for m in metrics]
+        bars = ax.bar(x + i * width, vals, width, label=model, color=color, alpha=0.85)
+        for bar, val in zip(bars, vals):
+            ax.text(bar.get_x() + bar.get_width() / 2,
+                    bar.get_height() + 0.01,
+                    f'{val:.0%}', ha='center', va='bottom', fontsize=7.5)
+
+    ax.set_title('Comparativo de Métricas – 4 Algoritmos de ML', pad=12)
+    ax.set_xticks(x + width * 1.5)
+    ax.set_xticklabels(metrics)
+    ax.set_ylabel('Valor')
+    ax.set_ylim(0, 1.15)
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:.0%}'))
+    ax.legend(title='Modelo')
+    # destaca o melhor modelo
+    best = META['model_name']
+    ax.set_title(f'Comparativo de Métricas – 4 Algoritmos  |  Melhor: {best}', pad=12)
     fig.tight_layout()
     return Response(_fig_to_png(fig), mimetype='image/png')
 
