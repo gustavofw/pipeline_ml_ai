@@ -63,13 +63,23 @@ EDU_LABELS = {
 }
 GROUPS = ['group A', 'group B', 'group C', 'group D', 'group E']
 
-SYSTEM_PROMPT = (
-    "Você é um assistente educacional especializado em análise de desempenho "
-    "estudantil com base em dados de Machine Learning. "
-    "Responda sempre em português brasileiro, de forma clara, empática e objetiva. "
-    "Baseie-se APENAS nas informações fornecidas — sem inventar dados. "
-    "Máximo 4 parágrafos por resposta."
-)
+SYSTEM_PROMPT = """Você é um assistente educacional especializado em análise de desempenho \
+estudantil com base em dados de Machine Learning.
+
+Responda sempre em português brasileiro, de forma clara, empática e objetiva.
+Baseie-se APENAS nas informações fornecidas — sem inventar dados.
+Máximo 4 parágrafos por resposta.
+
+GRÁFICOS DISPONÍVEIS — use os marcadores abaixo quando o usuário pedir uma visualização:
+- [GRAPH:correlation] → Matriz de Correlação entre as notas de matemática, leitura, escrita e média
+- [GRAPH:boxplot]     → Box Plot das notas separadas por tipo de almoço (padrão vs gratuito/reduzido)
+- [GRAPH:frequency]  → Frequência de aprovação por grupo étnico
+
+Regras para gráficos:
+1. Insira o marcador na linha em que o gráfico deve aparecer.
+2. Após o marcador, explique brevemente o que o gráfico mostra e o que se pode concluir.
+3. Use APENAS os marcadores listados acima — não invente outros.
+4. Se o usuário não pedir gráfico, não inclua marcadores."""
 
 # ─── Geração de gráficos (servidos como rotas) ────────────────────────────────
 def _fig_to_png(fig) -> bytes:

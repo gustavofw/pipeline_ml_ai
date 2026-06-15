@@ -438,7 +438,7 @@ Após a análise, pode me fazer perguntas sobre o resultado!
       const html = `<span class="result-badge ${badgeClass}">${icon} ${data.label}</span>${probaText}
 <small style="color:#6b7280">Modelo: {{ model_name }}</small>
 
-${escapeHtml(data.explanation)}`;
+${renderGraphs(escapeHtml(data.explanation))}`;
 
       addMessage(html, 'bot');
       studentContext = data.context;
@@ -472,7 +472,7 @@ ${escapeHtml(data.explanation)}`;
       });
       const data = await resp.json();
       removeTyping();
-      addMessage(escapeHtml(data.response), 'bot');
+      addMessage(renderGraphs(escapeHtml(data.response)), 'bot');
     } catch (err) {
       removeTyping();
       addMessage(`Erro: ${err.message}`, 'bot');
@@ -490,6 +490,20 @@ ${escapeHtml(data.explanation)}`;
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/\n/g, '<br>');
+  }
+
+  // Substitui marcadores [GRAPH:tipo] por imagens geradas pelo servidor
+  function renderGraphs(text) {
+    return text.replace(/\[GRAPH:(correlation|boxplot|frequency)\]/gi, (match, tipo) => {
+      const labels = {
+        correlation: 'Matriz de Correlação',
+        boxplot:     'Box Plot – Notas por Almoço',
+        frequency:   'Frequência de Aprovação por Grupo Étnico',
+      };
+      return `<br><img src="/plot/${tipo}" alt="${labels[tipo]}"
+               style="max-width:100%;border-radius:8px;margin:8px 0;display:block;">
+               <small style="color:#6b7280">${labels[tipo]}</small><br>`;
+    });
   }
 </script>
 
