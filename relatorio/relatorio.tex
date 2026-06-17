@@ -7,53 +7,51 @@
 \usepackage{booktabs}
 \usepackage{float}
 \usepackage{amsmath}
-\usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue]{hyperref}
-\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=2cm]{geometry}
-\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage[top=3.0cm, bottom=2.5cm, left=3cm, right=2cm]{geometry}
 \usepackage{array}
 \usepackage{caption}
 \usepackage{setspace}
-\usepackage{titlesec}
 \usepackage{fancyhdr}
-\usepackage{tcolorbox}
+\usepackage{indentfirst}
 
 \onehalfspacing
 
+% ── Cabeçalho e rodapé ────────────────────────────────────────────────────────
 \pagestyle{fancy}
 \fancyhf{}
-\rhead{\small Agente Preditivo de Desempenho Estudantil}
-\lhead{\small Relatório Técnico}
-\cfoot{\thepage}
+\fancyhead[L]{\textbf{\large UNOESC}}
+\fancyhead[C]{\small\scshape Relatório Técnico}
+\fancyhead[R]{\small IA e Sistemas Inteligentes\,---\,2026}
+\fancyfoot[L]{\small UNOESC-Chapecó}
+\fancyfoot[C]{\small\itshape Última modificação: junho de 2026}
+\fancyfoot[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.8pt}
+\renewcommand{\footrulewidth}{0.4pt}
 
-\titleformat{\section}{\large\bfseries\color[HTML]{1e3a8a}}{\thesection}{1em}{}
-\titleformat{\subsection}{\normalsize\bfseries\color[HTML]{2563eb}}{\thesubsection}{1em}{}
+% ── Macro para atribuição de figuras ──────────────────────────────────────────
+\newcommand{\fonte}{%
+  \par\vspace{0.15em}%
+  {\centering\footnotesize Fonte: Autoria própria.\par}%
+  \vspace{0.5em}%
+}
 
 \begin{document}
 
-% ── Capa ──────────────────────────────────────────────────────────────────────
-\begin{titlepage}
-  \centering
-  \vspace*{2cm}
-  {\Large\bfseries Universidade Paulista -- UNIP \par}
-  \vspace{0.5cm}
-  {\large Inteligência Artificial \par}
-  \vspace{3cm}
-  {\Huge\bfseries\color[HTML]{1e3a8a} Agente Preditivo de\\[0.3em]
-  Desempenho Estudantil \par}
-  \vspace{1.5cm}
-  {\large Relatório Técnico \par}
-  \vspace{3cm}
-  {\large\itshape Grupo: \par}
-  \vspace{0.3cm}
-  {\normalsize
-    Nome do Integrante 1 \\
-    Nome do Integrante 2 \\
-    Nome do Integrante 3 \\
-    Nome do Integrante 4 \par
-  }
-  \vfill
-  {\large 2026 \par}
-\end{titlepage}
+% ── Bloco de título ───────────────────────────────────────────────────────────
+\begin{center}
+  \vspace*{0.3cm}
+  {\LARGE\bfseries Agente Preditivo de Desempenho Estudantil}\\[0.8em]
+  {\large\itshape Students Performance in Exams\,---\,Kaggle}\\[0.5em]
+  \rule{0.55\textwidth}{0.4pt}\\[0.7em]
+  {\normalsize UNOESC\,---\,Universidade do Oeste de Santa Catarina}\\[0.2em]
+  {\normalsize Disciplina: Inteligência Artificial e Sistemas Inteligentes}\\[0.8em]
+  {\normalsize\bfseries Gustavo Fabrin Wildner}\\[0.2em]
+  {\normalsize\bfseries Luiz Augusto Lise}\\[0.6em]
+  {\normalsize junho de 2026}
+\end{center}
+
+\medskip\hrule\bigskip
 
 % ── Sumário ───────────────────────────────────────────────────────────────────
 \tableofcontents
@@ -62,22 +60,24 @@
 % ── 1. Introdução ─────────────────────────────────────────────────────────────
 \section{Introdução e Descrição do Problema}
 
-O desempenho acadêmico de estudantes é influenciado por uma combinação de
-fatores socioeconômicos, culturais e comportamentais. Compreender quais
-variáveis têm maior impacto pode auxiliar gestores escolares, professores e
-famílias na tomada de decisões mais eficazes para apoiar os alunos em risco de
-reprovação.
+O desempenho acadêmico dos estudantes resulta da combinação de fatores
+socioeconômicos, familiares e comportamentais. Identificar quais dessas
+variáveis exercem maior influência pode auxiliar gestores educacionais e
+famílias na tomada de decisões mais eficazes para apoiar os alunos em risco
+de reprovação.
 
-Este projeto tem como objetivo construir um \textbf{Agente Preditivo Especialista}
-capaz de: \textbf{(i)} predizer se um estudante será aprovado ou reprovado com
-base em seu perfil socioeconômico e acadêmico; \textbf{(ii)} explicar o
-resultado em linguagem natural por meio de um agente inteligente baseado em
-Large Language Model (LLM).
+Este projeto propõe um \textbf{Agente Preditivo Especialista} com dois
+objetivos principais: \textbf{(i)} classificar automaticamente se um
+estudante será aprovado ou reprovado com base em seu perfil socioeconômico e
+acadêmico; e \textbf{(ii)} explicar o resultado obtido em linguagem natural
+por meio de um agente inteligente baseado em Large Language Model (LLM),
+tornando o sistema acessível a usuários não técnicos.
 
-A solução integra técnicas de Análise Exploratória de Dados (EDA), quatro
-algoritmos de Aprendizado de Máquina -- Regressão Linear Múltipla, KNN,
-MLP e Naive Bayes -- e a API de Inferência do Hugging Face com o modelo
-Llama~3.1-8B-Instruct.
+A solução integra: Análise Exploratória de Dados (EDA), quatro algoritmos de
+Aprendizado de Máquina --- Regressão Linear Múltipla, KNN, MLP e Naive Bayes
+--- e a API de Inferência do Hugging Face com o modelo
+\textit{Llama~3.1-8B-Instruct}. A interface de interação é um chatbot desenvolvido com Flask e Bootstrap~5,
+acessível via navegador web.
 
 % ── 2. Conjunto de Dados ──────────────────────────────────────────────────────
 \section{Conjunto de Dados}
@@ -85,102 +85,141 @@ Llama~3.1-8B-Instruct.
 \subsection{Fonte}
 
 O conjunto de dados utilizado é o \textit{Students Performance in Exams},
-disponível publicamente no Kaggle
+disponibilizado publicamente na plataforma Kaggle pelo usuário SP Scientist
 (\url{https://www.kaggle.com/datasets/spscientist/students-performance-in-exams}).
 
 \subsection{Descrição das Variáveis}
 
-O dataset contém 1000 registros e 8 atributos originais,
-descritos na Tabela~\ref{tab:variaveis}.
+O dataset contém 1000 registros sem valores nulos e 8
+atributos originais, descritos na Tabela~\ref{tab:variaveis}.
 
 \begin{table}[H]
   \centering
-  \caption{Descrição das variáveis do dataset}
+  \caption{Descrição das variáveis do dataset.}
   \label{tab:variaveis}
   \begin{tabular}{lll}
     \toprule
     \textbf{Variável} & \textbf{Tipo} & \textbf{Descrição} \\
     \midrule
-    gender                         & Categórica & Gênero do estudante \\
-    race/ethnicity                 & Categórica & Grupo étnico (A--E) \\
-    parental level of education    & Ordinal    & Escolaridade dos pais (6 níveis) \\
-    lunch                          & Binária    & Tipo de almoço (padrão / gratuito) \\
-    test preparation course        & Binária    & Realizou curso preparatório? \\
-    math score                     & Numérica   & Nota de matemática (0--100) \\
-    reading score                  & Numérica   & Nota de leitura (0--100) \\
-    writing score                  & Numérica   & Nota de escrita (0--100) \\
+    \texttt{gender}                      & Categórica & Gênero do estudante (male / female) \\
+    \texttt{race/ethnicity}              & Categórica & Grupo étnico (A, B, C, D ou E) \\
+    \texttt{parental level of education} & Ordinal    & Escolaridade dos pais (6 níveis) \\
+    \texttt{lunch}                       & Binária    & Tipo de almoço (standard / free--reduced) \\
+    \texttt{test preparation course}     & Binária    & Realizou curso preparatório? \\
+    \texttt{math score}                  & Numérica   & Nota de matemática (0--100) \\
+    \texttt{reading score}               & Numérica   & Nota de leitura (0--100) \\
+    \texttt{writing score}               & Numérica   & Nota de escrita (0--100) \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \subsection{Variável-Alvo}
 
-Uma vez que os algoritmos de classificação exigem uma variável-alvo discreta,
-criamos o atributo \textbf{passed} calculado da seguinte forma:
+Por se tratar de um problema de classificação, foi criada a variável binária
+\textbf{passed} a partir da média aritmética das três notas:
 
 \[
   \text{average\_score} = \frac{\text{math} + \text{reading} + \text{writing}}{3},
   \qquad
-  \text{passed} = \begin{cases} 1 & \text{se average\_score} \geq 60 \\ 0 & \text{caso contrário} \end{cases}
+  \text{passed} =
+  \begin{cases}
+    1 & \text{se average\_score} \geq 60 \\
+    0 & \text{caso contrário}
+  \end{cases}
 \]
 
 A distribuição resultante foi: \textbf{715 aprovados}
 (71.5%) e \textbf{285 reprovados}
-(28.5%).
+(28.5%). O limiar de 60 pontos representa a nota
+média mínima convencional de aprovação adotada como referência neste trabalho.
 
 % ── 3. Análise Exploratória ───────────────────────────────────────────────────
 \section{Análise Exploratória dos Dados}
 
+A Análise Exploratória de Dados (EDA) foi conduzida por meio de oito
+visualizações distintas, cada qual projetada para revelar um aspecto
+diferente da estrutura e dos padrões presentes no dataset. Todos os gráficos
+são gerados dinamicamente pelo servidor Flask e também exportados neste
+relatório com análise detalhada.
+
 \subsection{Estatísticas Descritivas}
 
-As médias das notas foram: matemática 66.1,
+As notas médias observadas foram: matemática 66.1,
 leitura 69.2 e escrita 68.1.
-Não foram identificados valores nulos no conjunto de dados.
+Nenhum valor nulo foi identificado no dataset. As três distribuições apresentam
+assimetria negativa leve, com maior concentração de estudantes na faixa dos
+60--80 pontos.
 
-\subsection{Matriz de Correlação}
+\subsection{Gráfico 1 --- Matriz de Correlação}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.70\textwidth]{figuras/correlacao.png}
-  \caption{Matriz de correlação entre as notas das três disciplinas e a média.}
+  \caption{Matriz de correlação entre as notas das três disciplinas e a média geral.}
   \label{fig:correlacao}
 \end{figure}
+\fonte
 
-A Figura~\ref{fig:correlacao} evidencia alta correlação entre todas as
-disciplinas (coeficientes acima de 0,80), indicando que estudantes com bom
-desempenho em uma disciplina tendem a ter bom desempenho nas demais. A
-correlação mais alta é entre leitura e escrita ($r > 0{,}95$), o que é
-esperado dado que ambas exigem habilidades linguísticas similares.
+A Figura~\ref{fig:correlacao} apresenta os coeficientes de correlação de
+Pearson entre as variáveis numéricas do dataset. Todos os pares de disciplinas
+exibem correlação fortemente positiva (acima de 0{,}80), indicando que
+estudantes com bom desempenho em uma matéria tendem a apresentar bom
+desempenho nas demais.
 
-\subsection{Distribuição das Notas}
+O par leitura--escrita apresenta a correlação mais alta ($r > 0{,}95$), o
+que é esperado pois ambas as disciplinas exigem habilidades linguísticas
+complementares. A alta correlação mútua entre as notas também tem implicação
+direta no desempenho dos algoritmos: o Naive Bayes, por pressupor
+independência condicional entre as features, terá sua premissa fundamental
+violada por esse conjunto de dados, o que antecipa uma performance inferior
+desse modelo.
+
+\subsection{Gráfico 2 --- Distribuição das Notas por Disciplina}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{figuras/distribuicao.png}
-  \caption{Histograma com curva de densidade (KDE) para cada disciplina.}
+  \caption{Histograma com curva de densidade (KDE) para as notas de matemática, leitura e escrita.}
   \label{fig:distribuicao}
 \end{figure}
+\fonte
 
-Conforme a Figura~\ref{fig:distribuicao}, as três distribuições aproximam-se
-de uma distribuição normal ligeiramente assimétrica à esquerda, com médias em
-torno de 65--70 pontos. A existência de uma leve cauda inferior indica uma
-minoria de estudantes com desempenho muito baixo.
+A Figura~\ref{fig:distribuicao} exibe a distribuição de frequência de cada
+disciplina acompanhada da curva de densidade estimada por kernel (KDE). A
+linha pontilhada vermelha indica a média de cada distribuição.
 
-\subsection{Box Plot por Tipo de Almoço}
+As três curvas aproximam-se de uma distribuição normal com leve assimetria
+à esquerda: a maior parte dos estudantes obtém notas entre 50 e 80 pontos,
+com uma cauda inferior que corresponde aos estudantes com maiores dificuldades.
+A matemática apresenta maior variância e cauda inferior mais pronunciada,
+sugerindo que é a disciplina com maior dispersão de desempenho. A presença
+de valores concentrados próximos à média favorece a separabilidade linear
+dos dados, o que explica o bom desempenho relativo da Regressão Linear.
+
+\subsection{Gráfico 3 --- Box Plot por Tipo de Almoço}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.85\textwidth]{figuras/boxplot_almoco.png}
-  \caption{Distribuição das notas por tipo de almoço.}
+  \caption{Distribuição das notas por tipo de almoço nas três disciplinas.}
   \label{fig:boxplot_almoco}
 \end{figure}
+\fonte
 
-A Figura~\ref{fig:boxplot_almoco} demonstra que estudantes com almoço padrão
-obtêm notas consistentemente mais altas em todas as disciplinas. Esta variável
-é um proxy socioeconômico relevante: acesso a alimentação adequada reflete
-condições financeiras familiares e impacta diretamente no desempenho.
+O box plot da Figura~\ref{fig:boxplot_almoco} compara as distribuições de
+notas entre estudantes com almoço padrão (\textit{standard}) e os com
+almoço subsidiado (\textit{free/reduced}), para cada disciplina.
 
-\subsection{Box Plot por Curso Preparatório}
+O resultado é consistente e significativo: estudantes com almoço padrão
+apresentam medianas e percentis superiores em todas as três matérias. A
+variável \textit{lunch} é amplamente reconhecida como um \textit{proxy}
+socioeconômico, pois o benefício de refeição gratuita ou com desconto é
+concedido a famílias de baixa renda. Esse gráfico evidencia, portanto,
+que as condições financeiras familiares influenciam diretamente o desempenho
+acadêmico dos estudantes --- tornando essa variável uma das mais relevantes
+para o modelo preditivo.
+
+\subsection{Gráfico 4 --- Box Plot por Curso Preparatório}
 
 \begin{figure}[H]
   \centering
@@ -188,165 +227,245 @@ condições financeiras familiares e impacta diretamente no desempenho.
   \caption{Distribuição das notas por realização do curso preparatório.}
   \label{fig:boxplot_prep}
 \end{figure}
+\fonte
 
-A conclusão do curso preparatório (Figura~\ref{fig:boxplot_prep}) eleva a
-mediana das notas em todas as disciplinas, com ganho mais expressivo em
-leitura e escrita. Esse resultado reforça a importância de intervenções
-pedagógicas direcionadas.
+A Figura~\ref{fig:boxplot_prep} demonstra o impacto do curso preparatório
+no desempenho acadêmico. Estudantes que concluíram o curso
+(\textit{completed}) apresentam medianas consistentemente superiores nas
+três disciplinas em comparação com aqueles que não o realizaram
+(\textit{none}).
 
-\subsection{Aprovação por Grupo Étnico}
+O ganho é especialmente notável em leitura e escrita, sugerindo que o
+conteúdo do curso está mais fortemente alinhado com habilidades linguísticas.
+Em matemática, a diferença também existe, embora menos pronunciada,
+indicando que a preparação formal em cálculo pode ser mais variável entre
+os estudantes. Do ponto de vista pedagógico, esse resultado reforça a
+importância de programas de preparação pré-avaliação como instrumento de
+inclusão educacional.
+
+\subsection{Gráfico 5 --- Aprovação por Grupo Étnico}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.85\textwidth]{figuras/frequencia_etnia.png}
-  \caption{Frequência de aprovação e reprovação por grupo étnico.}
+  \caption{Frequência de aprovados e reprovados por grupo étnico.}
   \label{fig:etnia}
 \end{figure}
+\fonte
 
-A Figura~\ref{fig:etnia} revela disparidades entre os grupos étnicos, com o
-Grupo~E apresentando a maior proporção de aprovados e o Grupo~A a menor. Estas
-diferenças podem refletir desigualdades sistêmicas e requerem atenção em
-políticas de equidade educacional.
+A Figura~\ref{fig:etnia} apresenta a distribuição absoluta de aprovados e
+reprovados para cada um dos cinco grupos étnicos (A a E). Os grupos são
+anonimizados no dataset original, impossibilitando identificação direta de
+quais populações representam.
 
-\subsection{Taxa de Aprovação por Escolaridade dos Pais}
+Observa-se variação notável entre os grupos: o Grupo~E exibe a maior
+proporção de aprovados em relação a reprovados, enquanto o Grupo~A apresenta
+o pior desempenho relativo. Essas disparidades sugerem que o grupo étnico
+carrega informação preditiva relevante no modelo --- provavelmente como
+reflexo indireto de desigualdades socioeconômicas e de acesso a recursos
+educacionais, e não como causa direta de capacidade acadêmica.
+
+\subsection{Gráfico 6 --- Taxa de Aprovação por Escolaridade dos Pais}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.85\textwidth]{figuras/escolaridade_pais.png}
-  \caption{Taxa de aprovação por nível de escolaridade dos pais.}
+  \caption{Taxa de aprovação por nível de escolaridade dos pais, em ordem crescente.}
   \label{fig:escolaridade}
 \end{figure}
+\fonte
 
-Há clara tendência positiva entre o nível educacional dos pais e a taxa de
-aprovação dos filhos (Figura~\ref{fig:escolaridade}). Filhos de pais com
-mestrado têm taxa de aprovação superior a filhos de pais com ensino médio
-incompleto, evidenciando a influência do capital cultural familiar.
+A Figura~\ref{fig:escolaridade} exibe a proporção de estudantes aprovados
+para cada nível de escolaridade parental, ordenados de forma crescente:
+do ensino médio incompleto (\textit{some high school}) até mestrado
+(\textit{master's degree}).
 
-\subsection{Scatter Plot: Matemática versus Leitura}
+A tendência é clara e monotonicamente crescente: filhos de pais com maior
+escolaridade apresentam taxas de aprovação sistematicamente mais elevadas.
+Essa relação evidencia a influência do capital cultural familiar na trajetória
+acadêmica dos filhos --- pais mais escolarizados tendem a oferecer maior
+suporte nos estudos, valorizar a educação formal e criar um ambiente
+doméstico mais propício ao aprendizado. A variável de escolaridade dos pais
+é, portanto, um preditor sociocultural importante incorporado ao modelo.
+
+\subsection{Gráfico 7 --- Scatter Matemática $\times$ Leitura}
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.65\textwidth]{figuras/scatter.png}
-  \caption{Scatter plot de matemática $\times$ leitura, colorido por resultado.}
+  \includegraphics[width=0.68\textwidth]{figuras/scatter.png}
+  \caption{Diagrama de dispersão de matemática $\times$ leitura, colorido por resultado final.}
   \label{fig:scatter}
 \end{figure}
+\fonte
 
-O scatter plot (Figura~\ref{fig:scatter}) confirma visualmente o limiar de
-decisão: estudantes com notas abaixo de 60 em ambas as disciplinas concentram-se
-no quadrante de reprovação, enquanto os aprovados ocupam o quadrante superior
-direito. A fronteira diagonal sugere que nenhuma disciplina isolada determina
-o resultado.
+O diagrama de dispersão da Figura~\ref{fig:scatter} posiciona cada estudante
+no plano formado pelas notas de matemática (eixo $x$) e leitura (eixo $y$),
+com coloração verde para aprovados e vermelha para reprovados. As linhas
+pontilhadas cinzas indicam o limiar de 60 pontos em cada eixo.
+
+A fronteira de decisão emerge visivelmente: estudantes no quadrante superior
+direito (acima de 60 em ambas as disciplinas) são quase todos aprovados,
+enquanto os do quadrante inferior esquerdo são quase todos reprovados. A
+existência de casos mistos próximos às linhas de 60 pontos revela que a nota
+de escrita também influencia o resultado final, confirmando que nenhuma
+disciplina isolada determina completamente a classificação. Esse padrão
+justifica o uso de um modelo de classificação multivariado.
+
+\subsection{Gráfico 8 --- Comparativo de Métricas dos Modelos}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{figuras/comparativo_modelos.png}
+  \caption{Comparativo visual das quatro métricas de avaliação para os quatro algoritmos.}
+  \label{fig:comparativo}
+\end{figure}
+\fonte
+
+A Figura~\ref{fig:comparativo} reúne em um único gráfico de barras agrupadas
+as métricas de acurácia, precisão, sensibilidade e especificidade dos quatro
+algoritmos. O modelo destacado em negrito na tabela comparativa (seção
+seguinte) é o que obteve a maior acurácia no conjunto de teste.
+
+Essa visualização multidimensional permite comparar os modelos além da
+acurácia simples: é possível identificar, por exemplo, modelos que maximizam
+a sensibilidade (identificando mais aprovados) em detrimento da especificidade
+(identificando menos reprovados), o que seria relevante em cenários onde
+detectar todos os estudantes em risco de reprovação é prioritário. A análise
+detalhada dos resultados é apresentada na Seção~\ref{sec:resultados}.
 
 % ── 4. Pré-processamento ──────────────────────────────────────────────────────
 \section{Pré-processamento dos Dados}
 
 \subsection{Codificação de Variáveis Categóricas}
 
+Todas as variáveis categóricas foram convertidas para representação numérica
+antes do treinamento:
+
 \begin{itemize}
   \item \textbf{gender}: binário ($\text{male}=1$, $\text{female}=0$).
   \item \textbf{lunch}: binário ($\text{standard}=1$, $\text{free/reduced}=0$).
   \item \textbf{test preparation course}: binário ($\text{completed}=1$, $\text{none}=0$).
-  \item \textbf{parental level of education}: ordinal (0 a 5, do menor para o maior nível).
-  \item \textbf{race/ethnicity}: \textit{one-hot encoding} gerando cinco colunas binárias (group A--E).
+  \item \textbf{parental level of education}: codificação ordinal de 0 (ensino
+  médio incompleto) a 5 (mestrado), respeitando a hierarquia natural dos
+  níveis de escolaridade.
+  \item \textbf{race/ethnicity}: \textit{one-hot encoding} gerando cinco
+  colunas binárias (\texttt{group\_A} a \texttt{group\_E}).
 \end{itemize}
 
 \subsection{Normalização}
 
-Aplicou-se \texttt{StandardScaler} para centralizar e escalar todas as
-features ($\mu=0$, $\sigma=1$). Esta etapa é essencial para algoritmos
-sensíveis à escala, como KNN e MLP.
+Após a codificação, aplicou-se \texttt{StandardScaler} para centralizar e
+escalar todas as features ($\mu=0$, $\sigma=1$). Essa etapa é essencial para
+algoritmos sensíveis à escala das variáveis, como KNN e MLP, evitando que
+features com valores numericamente maiores dominem o aprendizado.
 
 \subsection{Divisão Treino/Teste}
 
-O dataset foi dividido em 80\% treino (800 amostras) e 20\% teste (200
-amostras) com estratificação pela variável-alvo, garantindo a preservação da
-proporção de classes em ambos os conjuntos.
+O dataset foi dividido em 80\% para treino (800 amostras) e 20\% para
+teste (200 amostras) utilizando divisão estratificada pela variável-alvo.
+A estratificação garante que a proporção de aprovados e reprovados seja
+preservada em ambos os conjuntos, evitando viés na avaliação.
 
 % ── 5. Algoritmos ─────────────────────────────────────────────────────────────
 \section{Algoritmos de Aprendizado de Máquina}
 
 \subsection{Regressão Linear Múltipla}
 
-A Regressão Linear Múltipla modela a relação entre as features de entrada e
-uma variável contínua de saída. Formalmente:
+A Regressão Linear Múltipla modela a relação linear entre um vetor de
+features $\mathbf{x}$ e uma variável contínua de saída:
 
 \[
   \hat{y} = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_n x_n
 \]
 
-\textbf{Adaptação para classificação:} como a Regressão Linear é um algoritmo
-de regressão, aplicou-se um \textit{threshold} em 60 sobre a nota média
-prevista para obter a predição de aprovação/reprovação.
+\noindent\textbf{Adaptação para classificação:} o modelo foi treinado para
+prever a nota média contínua. Após a inferência, aplica-se um limiar de
+60 pontos sobre o valor previsto para produzir a classificação
+aprovado/reprovado.
 
-\textbf{Vantagens:} simplicidade, interpretabilidade dos coeficientes,
-treinamento rápido, sem hiperparâmetros críticos.
+\noindent\textbf{Vantagens:} simplicidade, interpretabilidade dos coeficientes
+$\beta_i$, treinamento rápido, sem hiperparâmetros críticos.
 
-\textbf{Limitações:} assume linearidade; não é nativamente um classificador;
-sensível a outliers; o threshold arbitrário pode introduzir erro.
+\noindent\textbf{Limitações:} assume linearidade; não é um classificador
+nativo; o limiar arbitrário pode introduzir erros; sensível a \textit{outliers}.
 
 \subsection{K-Nearest Neighbors (KNN)}
 
-O KNN classifica um novo ponto com base nos $k$ vizinhos mais próximos no
-espaço das features. Utilizado com $k=7$ para suavizar a fronteira de decisão.
+O KNN classifica um novo ponto de acordo com os $k$ vizinhos mais próximos
+no espaço das features, usando distância Euclidiana. Neste projeto, utilizou-se
+$k=7$ para suavizar a fronteira de decisão.
 
-\textbf{Vantagens:} não paramétrico, intuitivo, não assume distribuição dos
-dados, eficaz em problemas não-lineares.
+\noindent\textbf{Vantagens:} não paramétrico; intuitivo; não assume
+distribuição dos dados; eficaz em problemas não-lineares.
 
-\textbf{Limitações:} alto custo de inferência (calcula distâncias para todos
-os pontos de treino); degradação com alta dimensionalidade (\textit{curse of
-dimensionality}); sensível à escala e a features irrelevantes.
+\noindent\textbf{Limitações:} alto custo de inferência (calcula distâncias
+para todos os pontos de treino); degrada com alta dimensionalidade
+(\textit{curse of dimensionality}); sensível a features irrelevantes.
 
-\subsection{MLP -- Multi-Layer Perceptron}
+\subsection{MLP --- Multi-Layer Perceptron}
 
-O MLP é uma rede neural artificial com camadas densamente conectadas. A
-arquitetura utilizada foi: \textbf{9 entradas} $\to$ \textbf{64 neurônios
-(ReLU)} $\to$ \textbf{32 neurônios (ReLU)} $\to$ \textbf{1 saída (Softmax)}.
-
-\textbf{Vantagens:} captura padrões não-lineares complexos; arquitetura
-flexível; generaliza bem com dados suficientes; estado da arte em muitas tarefas.
-
-\textbf{Limitações:} ``caixa-preta'' (baixa interpretabilidade); requer ajuste
-de hiperparâmetros; pode sofrer \textit{overfitting}; maior custo computacional
-de treinamento.
-
-\subsection{Naive Bayes}
-
-O Naive Bayes aplica o Teorema de Bayes assumindo independência condicional
-entre as features:
+O MLP é uma rede neural artificial com camadas densamente conectadas.
+A arquitetura adotada foi:
 
 \[
-  P(C_k | \mathbf{x}) \propto P(C_k) \prod_{i=1}^{n} P(x_i | C_k)
+  \underbrace{9}_{\text{entradas}} \;\longrightarrow\;
+  \underbrace{64}_{\text{ReLU}} \;\longrightarrow\;
+  \underbrace{32}_{\text{ReLU}} \;\longrightarrow\;
+  \underbrace{1}_{\text{saída}}
 \]
 
-Utilizou-se a variante \texttt{GaussianNB}, que assume distribuição normal
-para cada feature contínua.
+A função de ativação ReLU ($\max(0,\,x)$) foi escolhida por sua simplicidade
+e resistência ao problema de gradientes nulos (\textit{vanishing gradient}).
 
-\textbf{Vantagens:} extremamente rápido; funciona bem com poucos dados;
-probabilístico e interpretável; robusto a features irrelevantes.
+\noindent\textbf{Vantagens:} captura padrões não-lineares complexos;
+arquitetura flexível; estado da arte em muitas tarefas de classificação.
 
-\textbf{Limitações:} a hipótese de independência entre features raramente
-se sustenta na prática (as notas das disciplinas são altamente correlacionadas,
-violando essa premissa); pode subestimar a probabilidade de classes raras.
+\noindent\textbf{Limitações:} baixa interpretabilidade (``caixa-preta'');
+requer ajuste de hiperparâmetros; pode sofrer \textit{overfitting}.
+
+\subsection{Naive Bayes (Gaussiano)}
+
+O Naive Bayes aplica o Teorema de Bayes com a hipótese simplificadora de
+independência condicional entre as features:
+
+\[
+  P(C_k \mid \mathbf{x}) \propto P(C_k)
+  \prod_{i=1}^{n} P(x_i \mid C_k)
+\]
+
+A variante \texttt{GaussianNB} assume distribuição normal para cada atributo
+contínuo.
+
+\noindent\textbf{Vantagens:} extremamente rápido; funciona com poucos dados;
+probabilístico e interpretável.
+
+\noindent\textbf{Limitações:} a hipótese de independência raramente se
+sustenta na prática --- neste dataset, as notas das disciplinas são
+fortemente correlacionadas (Figura~\ref{fig:correlacao}), violando
+diretamente essa premissa.
 
 % ── 6. Resultados ─────────────────────────────────────────────────────────────
 \section{Resultados e Análise Comparativa}
+\label{sec:resultados}
 
 \subsection{Métricas de Avaliação}
 
-As métricas utilizadas foram derivadas da matriz de confusão:
+As métricas foram derivadas da matriz de confusão, onde VP, VN, FP e FN
+representam Verdadeiros Positivos, Verdadeiros Negativos, Falsos Positivos
+e Falsos Negativos, respectivamente:
 
 \begin{align*}
-  \text{Acurácia}       &= \frac{VP + VN}{VP + VN + FP + FN} \\[4pt]
-  \text{Precisão}       &= \frac{VP}{VP + FP} \\[4pt]
-  \text{Sensibilidade}  &= \frac{VP}{VP + FN} \\[4pt]
-  \text{Especificidade} &= \frac{VN}{VN + FP}
+  \text{Acurácia}       &= \dfrac{VP + VN}{VP + VN + FP + FN} \\[6pt]
+  \text{Precisão}       &= \dfrac{VP}{VP + FP} \\[6pt]
+  \text{Sensibilidade}  &= \dfrac{VP}{VP + FN} \\[6pt]
+  \text{Especificidade} &= \dfrac{VN}{VN + FP}
 \end{align*}
 
 \subsection{Tabela Comparativa}
 
 \begin{table}[H]
   \centering
-  \caption{Comparativo de métricas dos quatro algoritmos (conjunto de teste, 20\%).}
+  \caption{Comparativo de métricas dos quatro algoritmos no conjunto de teste (20\%).}
   \label{tab:metricas}
   \begin{tabular}{lcccc}
     \toprule
@@ -361,40 +480,33 @@ As métricas utilizadas foram derivadas da matriz de confusão:
   \end{tabular}
 \end{table}
 
-O modelo selecionado para produção foi o \textbf{MLP}, com
-acurácia de 71.0%.
+O modelo selecionado para produção foi o \textbf{MLP},
+com acurácia de 71.0%.
 
-\subsection{Comparativo Visual}
+\subsection{Análise Crítica dos Resultados}
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=\textwidth]{figuras/comparativo_modelos.png}
-  \caption{Comparativo visual das métricas dos quatro algoritmos.}
-  \label{fig:comparativo}
-\end{figure}
-
-\subsection{Análise Crítica}
-
-Conforme a Tabela~\ref{tab:metricas} e a Figura~\ref{fig:comparativo}:
+Com base na Tabela~\ref{tab:metricas} e na Figura~\ref{fig:comparativo}:
 
 \begin{itemize}
-  \item \textbf{Regressão Linear} apresentou desempenho razoável considerando
-  que foi adaptada de um algoritmo de regressão. Sua baixa precisão reflete a
-  limitação do threshold como mecanismo de classificação.
+  \item \textbf{Regressão Linear:} apresentou desempenho razoável
+  considerando que é essencialmente um algoritmo de regressão adaptado para
+  classificação via limiar. Sua simplicidade e ausência de hiperparâmetros
+  a tornam uma boa linha de base (\textit{baseline}).
 
-  \item \textbf{KNN} obteve métricas equilibradas, demonstrando a eficácia de
-  algoritmos baseados em instâncias para este problema. A performance é
-  condizente com um dataset de tamanho moderado (1000 amostras).
+  \item \textbf{KNN ($k=7$):} obteve métricas equilibradas, demonstrando a
+  eficácia de algoritmos baseados em instâncias para este problema. O valor
+  $k=7$ suaviza a fronteira de decisão, reduzindo o ruído sem perder
+  sensibilidade.
 
-  \item \textbf{MLP} alcançou o melhor resultado geral, evidenciando sua
+  \item \textbf{MLP:} alcançou o melhor resultado geral, evidenciando sua
   capacidade de capturar interações não-lineares entre as variáveis
-  socioeconômicas. A combinação de normalização e arquitetura em duas camadas
-  ocultas contribuiu para a generalização.
+  socioeconômicas. A arquitetura em duas camadas ocultas (64 $\to$ 32
+  neurônios com ReLU) foi suficiente para generalizar ao conjunto de teste.
 
-  \item \textbf{Naive Bayes} apresentou o desempenho mais baixo, o que era
-  esperado: a premissa de independência entre features é fortemente violada,
-  pois as notas das disciplinas são altamente correlacionadas entre si
-  (conforme demonstrado na Figura~\ref{fig:correlacao}).
+  \item \textbf{Naive Bayes:} apresentou o pior desempenho, resultado esperado:
+  a forte correlação entre as notas (Figura~\ref{fig:correlacao}) viola
+  diretamente a hipótese de independência condicional, pilar fundamental
+  desse algoritmo.
 \end{itemize}
 
 % ── 7. Arquitetura do Agente ──────────────────────────────────────────────────
@@ -405,68 +517,57 @@ Conforme a Tabela~\ref{tab:metricas} e a Figura~\ref{fig:comparativo}:
 A arquitetura final integra três componentes principais:
 
 \begin{enumerate}
-  \item \textbf{Modelo de ML (offline):} treinado e serializado com
-  \texttt{pickle} pelo script \texttt{etapa\_a.py}. Inclui o
-  \texttt{StandardScaler} e os metadados de métricas.
+  \item \textbf{Módulo de ML (offline):} treinado e serializado com
+  \texttt{pickle} pelo script \texttt{etapa\_a.py}. Gera os artefatos
+  \texttt{best\_model.pkl}, \texttt{scaler.pkl} e \texttt{metadata.pkl}.
 
   \item \textbf{Backend Flask (online):} servidor Python que recebe dados
-  via HTTP POST, aplica o pré-processamento, executa a predição e chama a
-  API do LLM.
+  via HTTP POST, aplica o mesmo pipeline de pré-processamento do treinamento,
+  executa a predição e chama a API do LLM. Também serve os oito gráficos de
+  EDA como imagens PNG dinâmicas via rotas dedicadas (\texttt{/plot/*}).
 
-  \item \textbf{Agente LLM (Hugging Face):} modelo Llama~3.1-8B-Instruct
-  acessado via \texttt{InferenceClient}. Recebe um \textit{System Prompt}
-  estruturado e o perfil do estudante, e retorna a explicação em linguagem natural.
+  \item \textbf{Agente LLM --- Hugging Face:} modelo
+  \textit{Llama~3.1-8B-Instruct} acessado via \texttt{InferenceClient}.
+  Recebe um \textit{System Prompt} estruturado e o perfil do estudante,
+  retornando explicação em linguagem natural.
 \end{enumerate}
 
 \subsection{Fluxo de Dados}
 
-O fluxo de uma predição segue as etapas abaixo:
-
 \begin{enumerate}
-  \item O usuário preenche o formulário na interface web e clica em
-  ``Analisar Perfil''.
-  \item O frontend envia os dados via \texttt{fetch} (AJAX) para o endpoint
+  \item O usuário preenche o formulário na interface web (gênero, grupo
+  étnico, escolaridade dos pais, almoço, curso preparatório).
+  \item O frontend envia os dados via AJAX (\texttt{fetch}) para
   \texttt{POST /predict}.
-  \item O Flask aplica o mesmo \textit{pipeline} de pré-processamento
-  utilizado no treinamento (codificação + StandardScaler).
-  \item O modelo serializado (\texttt{best\_model.pkl}) realiza a predição.
-  \item O resultado é enviado ao Llama~3.1 via Hugging Face Inference API,
-  juntamente com o perfil do estudante e o \textit{System Prompt}.
-  \item A resposta do LLM é retornada ao frontend e exibida como mensagem
-  do chatbot.
-  \item O usuário pode fazer perguntas de \textit{follow-up} pelo chat,
-  mantendo o contexto da predição.
+  \item O Flask aplica a codificação e normalização idênticas ao treinamento.
+  \item O modelo serializado realiza a predição binária (aprovado = 1 ou
+  reprovado = 0).
+  \item O resultado e o perfil são enviados ao Llama~3.1 via HuggingFace
+  Inference API.
+  \item A resposta em linguagem natural é retornada ao frontend e exibida
+  como mensagem do chatbot.
+  \item O usuário pode solicitar gráficos ou fazer perguntas de
+  \textit{follow-up}; o LLM insere marcadores \texttt{[GRAPH:tipo]} que o
+  frontend substitui automaticamente por imagens geradas pelo Flask.
 \end{enumerate}
 
-\subsection{System Prompt}
-
-O \textit{System Prompt} instrui o agente a:
-\begin{itemize}
-  \item Explicar o resultado em linguagem clara e acessível.
-  \item Identificar os fatores do perfil que mais influenciaram a predição.
-  \item Fornecer recomendações práticas sem inventar informações.
-  \item Gerar gráficos sob demanda via marcadores especiais
-  (\texttt{[GRAPH:tipo]}), que são interceptados pelo frontend e substituídos
-  por imagens geradas dinamicamente pelo Flask.
-\end{itemize}
-
-\subsection{Tecnologias Utilizadas}
+\subsection{Stack Tecnológico}
 
 \begin{table}[H]
   \centering
-  \caption{Stack tecnológico do projeto}
+  \caption{Tecnologias utilizadas no projeto.}
   \label{tab:tech}
   \begin{tabular}{lll}
     \toprule
-    \textbf{Camada}   & \textbf{Tecnologia}       & \textbf{Versão} \\
+    \textbf{Camada}          & \textbf{Tecnologia}           & \textbf{Versão} \\
     \midrule
-    Linguagem         & Python                    & 3.x \\
-    ML                & scikit-learn              & $\geq$ 1.3 \\
-    EDA/Visualização  & Seaborn + Matplotlib      & $\geq$ 0.13 / 3.7 \\
-    Backend           & Flask                     & $\geq$ 3.0 \\
-    LLM               & Llama 3.1-8B-Instruct     & via HuggingFace \\
-    Frontend          & Bootstrap 5 + JavaScript  & 5.3 \\
-    Versionamento     & Git / GitHub              & -- \\
+    Linguagem                & Python                        & 3.x \\
+    Aprendizado de Máquina   & scikit-learn                  & $\geq$ 1.3 \\
+    EDA / Visualização       & Seaborn + Matplotlib          & $\geq$ 0.13 / 3.7 \\
+    Backend                  & Flask                         & $\geq$ 3.0 \\
+    LLM                      & Llama 3.1-8B-Instruct         & via HuggingFace \\
+    Frontend                 & Bootstrap 5 + JavaScript      & 5.3 \\
+    Versionamento            & Git / GitHub                  & --- \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -475,24 +576,27 @@ O \textit{System Prompt} instrui o agente a:
 \section{Conclusão}
 
 Este projeto demonstrou com sucesso a integração entre técnicas clássicas de
-Aprendizado de Máquina e Inteligência Artificial Generativa para construir um
-agente preditivo funcional e interpretável.
+Aprendizado de Máquina e Inteligência Artificial Generativa para construir
+um agente preditivo funcional e interpretável.
 
-O modelo \textbf{MLP} obteve o melhor desempenho geral com
-acurácia de 71.0%,
+O modelo \textbf{MLP} obteve o melhor desempenho no
+conjunto de teste, com acurácia de
+71.0%,
 precisão de 74.9% e
-sensibilidade de 89.5%,
-sendo selecionado para integração com o agente.
+sensibilidade de 89.5%.
 
-A análise exploratória revelou que variáveis socioeconômicas -- especialmente
-o tipo de almoço (proxy de renda familiar) e a escolaridade dos pais --
-exercem influência significativa sobre o desempenho acadêmico, reforçando
-a importância de políticas públicas de equidade educacional.
+A análise exploratória revelou que variáveis socioeconômicas --- especialmente
+o tipo de almoço (proxy de renda familiar) e a escolaridade dos pais ---
+exercem influência significativa sobre o desempenho acadêmico. Tais
+descobertas reforçam a importância de políticas públicas de equidade
+educacional voltadas a reduzir essas disparidades.
 
-A integração com o LLM (Llama~3.1) mostrou-se eficaz para ``traduzir'' o
+A integração com o LLM Llama~3.1 mostrou-se eficaz para ``traduzir'' o
 resultado matemático do modelo em linguagem natural, tornando a predição
-acessível a usuários não técnicos e permitindo interação conversacional
-de \textit{follow-up}.
+acessível a usuários não técnicos e permitindo interação conversacional de
+\textit{follow-up}. A capacidade do agente de gerar gráficos dinâmicos sob
+demanda agrega uma dimensão exploratória adicional ao sistema, aproximando-o
+de um assistente educacional interativo.
 
 \newpage
 
@@ -503,28 +607,31 @@ de \textit{follow-up}.
   S.P. Scientist.
   \textit{Students Performance in Exams}.
   Kaggle, 2018.
-  Disponível em: \url{https://www.kaggle.com/datasets/spscientist/students-performance-in-exams}.
+  Disponível em:
+  \url{https://www.kaggle.com/datasets/spscientist/students-performance-in-exams}.
 
 \bibitem{sklearn}
   Pedregosa, F. et al.
   \textit{Scikit-learn: Machine Learning in Python}.
-  Journal of Machine Learning Research, 12, 2825--2830, 2011.
+  Journal of Machine Learning Research, 12, pp.\,2825--2830, 2011.
 
 \bibitem{llama}
   Meta AI.
   \textit{Llama 3.1: Open Foundation and Fine-Tuned Chat Models}.
   arXiv preprint, 2024.
-  Disponível em: \url{https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct}.
+  Disponível em:
+  \url{https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct}.
 
 \bibitem{flask}
   Grinberg, M.
-  \textit{Flask Web Development}.
+  \textit{Flask Web Development: Developing Web Applications with Python}.
   O'Reilly Media, 2018.
 
 \bibitem{seaborn}
   Waskom, M. L.
   \textit{seaborn: statistical data visualization}.
   Journal of Open Source Software, 6(60), 3021, 2021.
+  \url{https://doi.org/10.21105/joss.03021}.
 
 \end{thebibliography}
 
