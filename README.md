@@ -114,16 +114,10 @@ pipeline_ml_ai/
 
 ### [Nome do Integrante 1]
 
-- ...
+- Gustavo Fabrin Wildner: Realização do código, com foco nas chamadas de api e backend, criação do relatório e edição do vídeo.
 
 ### [Nome do Integrante 2]
 
 - ...
 
-### [Nome do Integrante 3]
 
-- ...
-
-### [Nome do Integrante 4]
-
-- ...
