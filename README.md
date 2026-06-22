@@ -114,10 +114,10 @@ pipeline_ml_ai/
 
 ### [Nome do Integrante 1]
 
-- Gustavo Fabrin Wildner: Realização do código, com foco nas chamadas de api e backend, criação do relatório e edição do vídeo.
+- Gustavo Fabrin Wildner: Realização do código, com foco nas chamadas de api, backend e frontend, criação do relatório e edição do vídeo.
 
 ### [Nome do Integrante 2]
 
-- ...
+- Luiz Augusto Lise: Participação na apresentação do projeto, com foco na explicação do código, funcionamento do pipeline de Machine Learning, integração com o backend Flask e interpretação dos resultados gerados pelos modelos.
 
 
